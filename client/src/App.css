@@ -1,0 +1,385 @@
+body {
+  margin: 0px;
+  width: 100vw;
+  height: 90vh;
+}
+
+#root {
+  height: 100%;
+}
+
+.leaflet-container {
+  cursor: pointer !important;
+}
+
+.map {
+  height: 100%;
+  z-index: 1;
+}
+
+.leaflet-heatmap-layer {
+  z-index: 2;
+}
+.navbar {
+  margin-bottom: 0;
+  
+  border: 0;
+  font-size: 22px !important;
+  line-height: 2.0 !important;
+  letter-spacing: 5px;
+  border-radius: 0;
+}
+
+ .navbarbrand {
+  background-color: transparent;
+  color: #fff;
+}
+
+
+
+.button {
+  padding-left: 3px;
+  padding-right: 5px;
+}
+
+.applyButton {
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  font-size: 14px !important;
+  top: 10px;
+  right: 20px;
+  z-index: 999;
+  color: gray;
+}
+
+.toogle {
+  white-space: nowrap;
+  width: auto;
+}
+
+.layers {
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  font-size: 12px !important;
+  top: 10px;
+  right: 20px;
+  z-index: 999;
+  color: gray;
+}
+
+.layermenu {
+  letter-spacing: 1px;
+  font-size: 12px !important;
+  z-index: 999;
+  color: gray;
+  padding: 5px;
+}
+
+.layeritem {
+  padding: 5px;
+  width:auto;
+  color: gray;
+  white-space: nowrap;
+}
+
+.list {
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  font-size: 12px !important;
+  top: 10px;
+  left: 50px;
+  z-index: 999;
+  color: gray;
+}
+
+.btn-group {
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  font-size: 12px !important;
+  top: 10px;
+  left: 290px;
+  z-index: 999;
+  color: gray;
+}
+
+.Priority {
+  
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  font-size: 16px !important;
+  top: 10px;
+  left: 50px;
+  z-index: 999;
+  color: gray;
+}
+
+.custommenu {
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  z-index: 1000;
+  color: gray;
+  width: auto;
+  padding: 10px;
+  font-size: 14px !important;
+  white-space: nowrap;
+}
+
+.agemenu {
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  z-index: 1000;
+  color: gray;
+  width: auto;
+  padding: 10px;
+  font-size: 14px !important;
+  white-space: nowrap;
+}
+
+.Age {
+  position: absolute;
+  font-family: "Century Gothic", sans-serif;
+  letter-spacing: 1px;
+  font-size: 16px !important;
+  top: 10px;
+  left: 140px;
+  z-index: 999;
+  color: gray;
+}
+
+
+.priorityHeader {
+  font-family: "Century Gothic", sans-serif;
+}
+
+.select-div {
+  float: left;
+}
+
+.clear-div {
+  float: right;
+}
+
+.mouseposition {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.satellite {
+  position: absolute;
+  bottom: 70px;
+  left: 10px;
+  z-index: 999;
+}
+.legend {
+  position: absolute;
+  bottom: 70px;
+  right: 10px;
+  z-index: 999;
+}
+
+.position {
+  position: absolute;
+  bottom: 5px;
+  left: 110px;
+  z-index: 999;
+}
+
+
+
+.displaytype {
+  font-size: 18px !important;
+  left: 50px;
+}
+
+.message {
+  color: red;
+}
+
+.aboutModal {
+  margin: 10x;
+  font-family: "Century Gothic", sans-serif;
+}
+
+.termsModal {
+  margin: 10x;
+  font-family: "Century Gothic", sans-serif;
+}
+
+.navdropdown {
+  font-size: 22px !important;
+  white-space: nowrap;
+  margin: 10x;
+
+}
+
+.navdropdownitem {
+  font-size: 18px !important;
+  margin: 20x;
+}
+
+.adminitem .adminitem:hover{
+  font-size: 18px !important;
+  margin: 10x;
+  white-space: nowrap;
+}
+
+.dropdown{
+  z-index: 1000;
+}
+
+.title {
+  /* width: 100%; 
+  overflow: hidden; */
+  display: flex;
+}
+
+.titleLeft {
+  width: 400px;
+  /* float: left; */
+}
+
+.titleRight {
+  flex-grow: 1;
+ 
+}
+
+.search {
+  float: left;
+}
+
+.dropdownproject {
+  float: right;
+}
+
+.clear {
+  position:absolute;
+  left: 18px;
+  bottom: 18px;
+
+}
+
+.select {
+  position:absolute;
+  left: 130px;
+  bottom: 18px;
+
+}
+
+.popup {
+  width: 200px;
+}
+
+.thumbnail {
+  height: 77px;
+  width: 103px;
+}
+
+.container {
+  float: right;
+}
+
+.text {
+  float: left;
+}
+
+.photo {
+  height: 648px;
+  width: 1000px;
+}
+
+.photoModal {
+  height: 648px;
+  width: 1037px;
+}
+
+.leftArrow {
+  position: absolute;
+  height: 64px;
+  width: 64px;
+  left: 55px;
+  bottom: 275px;
+}
+.rightArrow {
+  position: absolute;
+  height: 64px;
+  width: 64px;
+  right: 25px;
+  bottom: 275px;
+
+
+}
+
+.lbstatus {
+  padding: 10px;
+  position: relative;
+  font-size: 16px !important;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+ .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+} 
+
+
+

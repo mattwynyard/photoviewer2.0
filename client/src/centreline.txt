@@ -1,0 +1,231 @@
+ //let zoom = leafletMap.getZoom();
+  //   let thickness = null;
+  //   //console.log(zoom);
+  //   thickness = (1 / zoom) * 0.005
+  //   if (zoom < 10) {
+  //     thickness = (1 / zoom) * 0.004;
+  //   } else if (zoom === 10) {
+  //     thickness =  (1 / zoom) * 0.0035;
+  //   } else if (zoom === 11) {
+  //     thickness =  (1 / zoom) * 0.003
+  //   } else if (zoom === 12) {
+  //     thickness =  (1 / zoom) * 0.0025
+  //   } else if (zoom === 13) {
+  //     thickness =  (1 / zoom) * 0.002
+  //   } else if (zoom === 14) {
+  //     thickness =  (1 / zoom) * 0.0015
+  //   } else if (zoom === 15) {
+  //     thickness =  (1 / zoom) * 0.001
+  //   } else {
+  //     thickness =  (1 / zoom) * 0.0008
+  //   }
+  // //console.log(thickness);
+  //   for (let i = 0; i < data.length; i += 1) {
+  //     let red = null;
+  //     let green = null;
+  //     let blue = null;
+  //     if (mouseclick === null) {
+  //       if (data[i].class === "Access") { //blue
+  //       red = 0;
+  //       green = 0;
+  //       blue = 1;
+  //       } else if (data[i].class === "Arterial") { //red
+  //         red = 1;
+  //         green = 0;
+  //         blue = 0;
+  //       } else if (data[i].class === "Primary Collector") { //orange
+  //         red = 1;
+  //         green = 0.5;
+  //         blue = 0;
+  //       } else if (data[i].class === "Low Volume") { //green
+  //         red = 0;
+  //         green = 1;
+  //         blue = 0;
+  //       } else if (data[i].class === "Secondary Collector") { //yellow
+  //         red = 1;
+  //         green = 1;
+  //         blue = 0;
+  //       }
+  //       else if (data[i].class === "Regional") { //black
+  //         red = 0;
+  //         green = 0;
+  //         blue = 0;
+  //       }
+  //       else if (data[i].class === "National") { //white
+  //         red = 1;
+  //         green = 1;
+  //         blue = 1;
+  //       }
+  //       else { //null
+  //         red = 1;
+  //         green = 0;
+  //         blue = 1;
+  //       }
+  //     } else {
+  //       red = ((i & 0x000000FF) >>>  0) / 255;
+  //       green = ((i & 0x0000FF00) >>>  8) / 255;
+  //       blue = ((i & 0x00FF0000) >>> 16) / 255;
+  //     }      
+  //     for (var j = 0; j < data[i].segment.length; j += 1) {
+        
+  //       if (data[i].segment.length < 2) {
+  //         console.log(data[i]);
+  //         continue;
+  //       }
+  //       if(data[i].segment.length < 3 ) {
+  //         //console.log(data[i]);
+  //         const pixel0 = {x: data[i].segment[0].x, y: data[i].segment[0].y};   
+  //         const pixel1 = {x: data[i].segment[1].x, y: data[i].segment[1].y};
+  //         if (pixel0.x === pixel1.x || pixel0.y === pixel1.y) {
+  //           //console.log(data[i]);
+  //           continue;
+  //         }
+  //         let p0 = new Vector2D(pixel0.x, pixel0.y);
+  //         let p1 = new Vector2D(pixel1.x, pixel1.y);
+  //         let line = Vector2D.subtract(p1, p0);
+  //         let normal = new Vector2D(-line.y, line.x)
+  //         let normalized = normal.normalize();
+  //         let a = Vector2D.subtract(p0, Vector2D.multiply(normalized,thickness));
+  //         let b = Vector2D.add(p0,  Vector2D.multiply(normalized,thickness));
+  //         let c = Vector2D.subtract(p1, Vector2D.multiply(normalized,thickness));
+  //         let d =  Vector2D.add(p1, Vector2D.multiply(normalized,thickness));
+  //         let l = Vector2D.subtract(a, b).length();
+  //         if (l > thickness * 2.1) {
+  //           console.log(l);
+  //         }
+  //         verts.push(a.x, a.y, red, green, blue);
+  //         verts.push(b.x, b.y, red, green, blue);
+  //         verts.push(c.x, c.y, red, green, blue);
+  //         verts.push(c.x, c.y, red, green, blue); 
+  //         verts.push(d.x, d.y, red, green, blue);
+  //         verts.push(b.x, b.y, red, green, blue);
+  //         continue;
+  //       } else {
+  //         if (j === 0) {
+  //           const pixel0 = {x: data[i].segment[j].x, y: data[i].segment[j].y};
+  //           const pixel1 = {x: data[i].segment[j + 1].x, y: data[i].segment[j + 1].y};
+  //           const pixel2 = {x: data[i].segment[j + 2].x, y: data[i].segment[j + 2].y};
+  //           let p0 = new Vector2D(pixel0.x, pixel0.y);
+  //           let p1 = new Vector2D(pixel1.x, pixel1.y);
+  //           let p2 = new Vector2D(pixel2.x, pixel2.y);
+    
+  //           let line = Vector2D.subtract(p1, p0);
+  //           let normal = new Vector2D(-line.y, line.x)
+  //           let normalized = normal.normalize();
+  //           let a = Vector2D.subtract(p0, Vector2D.multiply(normalized,thickness));
+  //           let b = Vector2D.add(p0, Vector2D.multiply(normalized,thickness));
+
+  //           let miter = this.getMiter(p0, p1, p2, thickness);
+  //           if (miter.x === 0 && miter.y === 0) {
+  //             continue;
+  //           }
+  //           let c = Vector2D.subtract(p1, miter);
+  //           let d = Vector2D.add(p1, miter);  
+  //           let l = Vector2D.subtract(a, b).length();
+  //           if (l > thickness * 2) {
+  //             //console.log(l);
+  //           }
+  //           verts.push(a.x, a.y, red, green, blue);
+  //           verts.push(b.x, b.y, red, green, blue);
+  //           verts.push(c.x, c.y, red, green, blue);
+  //           verts.push(c.x, c.y, red, green, blue); 
+  //           verts.push(d.x, d.y, red, green, blue);
+  //           verts.push(b.x, b.y, red, green, blue);
+
+  //           } else if (j === data[i].segment.length - 2) {
+  //           const pixel0 = {x: data[i].segment[j -1].x, y: data[i].segment[j -1].y};
+  //           const pixel1 = {x: data[i].segment[j].x, y: data[i].segment[j].y};
+  //           const pixel2 = {x: data[i].segment[j + 1].x, y: data[i].segment[j + 1].y};
+  //           let p0 = new Vector2D(pixel0.x, pixel0.y);
+  //           let p1 = new Vector2D(pixel1.x, pixel1.y);
+  //           let p2 = new Vector2D(pixel2.x, pixel2.y);
+  //           let miter1 = this.getMiter(p0, p1, p2, thickness);
+  //           if (miter1.x === 0 && miter1.y === 0) {
+  //             break;
+  //           }
+  //           let a = Vector2D.add(p1, miter1);
+  //           let b = Vector2D.subtract(p1,  miter1);
+  //           let line = Vector2D.subtract(p2, p1);
+  //           let normal = new Vector2D(-line.y, line.x)
+  //           let normalized = normal.normalize();
+  //           let c = Vector2D.subtract(p2, Vector2D.multiply(normalized,thickness));
+  //           let d = Vector2D.add(p2, Vector2D.multiply(normalized,thickness));
+  //           let l = Vector2D.subtract(c, d).length();
+  //           if (l > thickness * 2.1) {
+  //             console.log(l);
+  //           }
+  //           verts.push(a.x, a.y, red, green, blue);
+  //           verts.push(b.x, b.y, red, green, blue);
+  //           verts.push(c.x, c.y, red, green, blue);
+  //           verts.push(c.x, c.y, red, green, blue); 
+  //           verts.push(d.x, d.y, red, green, blue);
+  //           verts.push(a.x, a.y, red, green, blue);
+  //           break;  
+  //           } else {
+  //           //console.log("middle");
+  //           const pixel0 = {x: data[i].segment[j -1].x, y: data[i].segment[j -1].y};
+  //           const pixel1 = {x: data[i].segment[j].x, y: data[i].segment[j].y};
+  //           const pixel2 = {x: data[i].segment[j + 1].x, y: data[i].segment[j + 1].y};
+  //           const pixel3 = {x: data[i].segment[j + 2].x, y: data[i].segment[j + 2].y};
+  //           let p0 = new Vector2D(pixel0.x, pixel0.y);
+  //           let p1 = new Vector2D(pixel1.x, pixel1.y);
+  //           let p2 = new Vector2D(pixel2.x, pixel2.y);
+  //           let p3 = new Vector2D(pixel3.x, pixel3.y);
+  //           //meter calc
+  //           let miter1 = this.getMiter(p0, p1, p2, thickness);
+  //           if (miter1.x === 0 && miter1.y === 0) {
+  //             continue;
+  //           }
+  //           p1 = new Vector2D(pixel1.x, pixel1.y);
+  //           p2 = new Vector2D(pixel2.x, pixel2.y);
+  //           p3 = new Vector2D(pixel3.x, pixel3.y);
+  //           let miter2 = this.getMiter(p1, p2, p3, thickness);
+  //           if (miter2.x === 0 && miter2.y === 0) {
+  //             continue;
+  //           }
+  //           let a = Vector2D.add(p1, miter1);
+  //           let b = Vector2D.subtract(p1,  miter1);
+  //           let c = Vector2D.add(p2, miter2);
+  //           let d = Vector2D.subtract(p2,  miter2);
+  //           verts.push(a.x, a.y, red, green, blue);
+  //           verts.push(b.x, b.y, red, green, blue);
+  //           verts.push(c.x, c.y, red, green, blue);
+  //           verts.push(c.x, c.y, red, green, blue);
+  //           verts.push(d.x, d.y, red, green, blue);
+  //           verts.push(b.x, b.y, red, green, blue);
+  //         }
+  //       }
+      //}
+    //}
+
+    in drawing on canvas function
+
+    //**** code for drawing lines //
+      // let numPoints = 0;
+      // let pointer = 0;
+      // for (var i = 0; i < data.length; i += 1) {
+      //   numPoints = (data[i].segment.length - 1) * 6;
+      //   params.gl.drawArrays(params.gl.TRIANGLES, pointer, numPoints);
+      //   pointer += numPoints;
+      // }   
+
+        getMiter(p0, p1, p2, thickness) {
+    let p2p1 = Vector2D.subtract(p2, p1);
+    let p1p0 = Vector2D.subtract(p1, p0);
+    let y = p2p1.y * -1;
+    let normal = new Vector2D(y, p2p1.x);
+    let normalized = normal.normalize();
+    p2p1.normalize();
+    p1p0.normalize();
+    p2p1 = Vector2D.subtract(p2, p1);
+    let tangent = Vector2D.add(p2p1, p1p0);    
+    let nTangent = tangent.normalize();
+    y = nTangent.y * -1;
+    let miter = new Vector2D(-nTangent.y, nTangent.x);
+    let length = thickness / Vector2D.dot(miter, normalized);
+    if (length > thickness * 1.5 || length < thickness * 0.5) {
+      return new Vector2D(0, 0);
+    }
+    let l = miter.multiply(length);
+    return new Vector2D(l.x, l.y);  
+  } 

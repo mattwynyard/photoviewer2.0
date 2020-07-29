@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="description" content="Onsite Developments Web App for displaying client road fault data alongside photos from amazon S3" />
+    <meta name="keywords" content="Osmium, Onsite, Onsite Developments">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="apple-touch-icon" href="logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <!-- vertex shader -->
+    <script id="vshader" type="x-shader/x-vertex">
+      uniform mat4 u_matrix;
+      attribute vec4 a_vertex;
+      attribute float a_pointSize;
+      attribute vec4 a_color;
+      varying vec4 v_color;
+
+      void main() {
+        gl_PointSize =  a_pointSize;
+        gl_Position = u_matrix * a_vertex;
+        v_color = a_color;
+      }
+    </script>
+    
+    <script id="fshader" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 v_color;
+      void main() {
+
+          float border = 0.05;
+          float radius = 0.5;
+
+          vec2 m = gl_PointCoord.xy - vec2(0.5, 0.5);
+          float dist = radius - sqrt(m.x * m.x + m.y * m.y);
+          vec4 color1 = vec4(v_color[0], v_color[1], v_color[2], v_color[3]);
+
+          float t = 0.0;
+          if (dist > border)
+            t = 1.0;
+            else if (dist > 0.0)
+            t = dist / border;
+            gl_FragColor = mix(vec4(0), v_color, t);
+      }
+    </script>
+      <script id="fshader-square" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 v_color;
+        void main() {
+          gl_FragColor = v_color;  
+        }
+      
+    </script>
+    <title>Onsite Developments Photo Viewer</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+</body>
+</html>
