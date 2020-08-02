@@ -10,7 +10,8 @@ import './PositionControl';
 import DynamicDropdown from './DynamicDropdown.js';
 import CustomModal from './CustomModal.js';
 import PhotoModal from './PhotoModal.js';
-import Vector2D from './Vector2D';
+import GLEngine from './GLEngine.js';
+
 import {LatLongToPixelXY, translateMatrix, scaleMatrix, pad, formatDate} from  './util.js'
 
 class App extends React.Component {
@@ -105,7 +106,7 @@ class App extends React.Component {
     this.callBackendAPI()
     .catch(err => alert(err));
     //this.setPriorities();
-    this.initializeGL();
+    this.initialize();
     this.customModal.current.delegate(this);
     this.photoModal.current.delegate(this);
   }
@@ -114,25 +115,20 @@ class App extends React.Component {
 
   }
 
-  initializeGL() {
+  initialize() {
     this.leafletMap = this.map.leafletElement;
-    if (this.gl == null) {
-      this.glLayer = L.canvasOverlay()
-      .addTo(this.leafletMap);
-      this.canvas = this.glLayer.canvas();
-      this.glLayer.canvas.width = this.canvas.width;
-      this.glLayer.canvas.height = this.canvas.height;
-      this.gl = this.canvas.getContext('webgl2', { antialias: true }, {preserveDrawingBuffer: false}); 
-      if (!this.gl) {
-        this.gl = this.canvas.getContext('webgl', { antialias: true }, {preserveDrawingBuffer: false});
-        console.log("Cannot load webgl2.0 using webgl instead");
-      }  
-      if (!this.gl) {
-        this.gl = this.canvas.getContext('experimental-webgl', { antialias: true }, {preserveDrawingBuffer: false});
-        console.log("Cannot load webgl1.0 using experimental-webgl instead");
-      } 
-      console.log(this.gl)    
-      this.glLayer.delegate(this);
+   
+    // if (this.gl == null) {
+    //   this.glLayer = L.canvasOverlay()
+    //   .addTo(this.leafletMap);
+    //   this.canvas = this.glLayer.canvas();
+      //this.glLayer.canvas.width = this.canvas.width;
+      //this.glLayer.canvas.height = this.canvas.height;
+      
+      this.GLEngine = new GLEngine(this.canvas, this.leafletMap); 
+      this.GLEngine.setAppDelegate(this);
+
+      //this.glLayer.delegate(this);
       this.position = L.positionControl();
       this.leafletMap.addControl(this.position);
       this.addEventListeners(); 
@@ -141,7 +137,7 @@ class App extends React.Component {
       } else {
         this.setState({priorityMode: "Grade"});
       }  
-    }  
+    //}  
   }
   /**
    * Fires when user clicks on map.
@@ -152,8 +148,9 @@ class App extends React.Component {
     if (this.state.glpoints !== null) {
       this.setState({selectedIndex: null});
       this.setState({selectedGLMarker: []});
-      this.setState({mouseclick: e})
-      this.redraw(this.state.glpoints);
+      //this.setState({mouseclick: e})
+      this.GLEngine.mouseclick = e;
+      this.GLEngine.redraw(this.state.glpoints);
     }
   }
   /**
@@ -190,126 +187,7 @@ class App extends React.Component {
       this.setState({selectedIndex: null});
       this.setState({selectedGLMarker: []});
     }
-    this.redraw(this.state.glpoints);
-  }
-
-  reColorPoints(data) {
-    let verts = new Float32Array(data);
-    if (this.state.mouseclick === null) {
-      if (this.state.selectedIndex === null) {
-        return verts;
-      } else {
-        //TODO
-        for (let i = 0; i < verts.length; i += 7) {
-          if (verts[i + 6] === this.state.selectedIndex) {
-            verts[i + 2] = 1.0;
-            verts[i + 3] = 0;
-            verts[i + 4] = 0;
-            verts[i + 5] = 1.0;
-          }
-        }
-      }
-      
-    } else {
-      for (let i = 0; i < verts.length; i += 7) {
-        let index = verts[i + 6];
-        //calculates r,g,b color from index
-        let r = ((index & 0x000000FF) >>  0) / 255;
-        let g = ((index & 0x0000FF00) >>  8) / 255;
-        let b = ((index & 0x00FF0000) >> 16) / 255;
-        verts[i + 2] = r;
-        verts[i + 3] = g;
-        verts[i + 4] = b;
-        verts[i + 5] = 1.0; //alpha
-      }
-    }
-    return verts;
-  }
-
-  redraw(data) {
-
-    this.glLayer.drawing(drawingOnCanvas); 
-    let pixelsToWebGLMatrix = new Float32Array(16);
-    this.mapMatrix = new Float32Array(16);  
-        // -- WebGl setup
-    let vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
-    this.gl.shaderSource(vertexShader, document.getElementById('vshader').text);
-    this.gl.compileShader(vertexShader);
-    let fragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-    //let length = this.state.activeLayers.length - 1;
-    this.gl.shaderSource(fragmentShader, document.getElementById('fshader').text);
-    this.gl.compileShader(fragmentShader);
-    // link shaders to create our program
-    let program = this.gl.createProgram();
-    this.gl.attachShader(program, vertexShader);
-    this.gl.attachShader(program, fragmentShader);
-    this.gl.linkProgram(program);
-    this.gl.useProgram(program);
-    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-    this.gl.enable(this.gl.BLEND);
-  // ----------------------------
-    // look up the locations for the inputs to our shaders.
-    var u_matLoc = this.gl.getUniformLocation(program, "u_matrix");
-    var colorLoc = this.gl.getAttribLocation(program, "a_color");
-    var vertLoc = this.gl.getAttribLocation(program, "a_vertex");
-    this.gl.aPointSize = this.gl.getAttribLocation(program, "a_pointSize");
-    // Set the matrix to some that makes 1 unit 1 pixel.
-    pixelsToWebGLMatrix.set([2 / this.canvas.width, 0, 0, 0, 0, -2 / this.canvas.height, 0, 0, 0, 0, 0, 0, -1, 1, 0, 1]);
-    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    this.gl.uniformMatrix4fv(u_matLoc, false, pixelsToWebGLMatrix); 
- 
-    var numPoints = data.length / 7 ; //[lat, lng, r, g, b, a, id]
-    let vertBuffer = this.gl.createBuffer();
-    //let vertArray = new Float32Array(verts);
-    let vertArray = this.reColorPoints(data);
-    let fsize = vertArray.BYTES_PER_ELEMENT;
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, vertArray, this.gl.STATIC_DRAW);
-    this.gl.vertexAttribPointer(vertLoc, 2, this.gl.FLOAT, false, fsize*7, 0);
-    this.gl.enableVertexAttribArray(vertLoc);
-    // -- offset for color buffer
-    this.gl.vertexAttribPointer(colorLoc, 4, this.gl.FLOAT, true, fsize*7, fsize*2);
-    this.gl.enableVertexAttribArray(colorLoc);
-    this.glLayer.redraw();
-
-    function drawingOnCanvas(canvasOverlay, params) {
-      if (this.delegate.gl == null)  {
-        return;
-      }
-      this.delegate.gl.clearColor(0, 0, 0, 0);
-      this.delegate.gl.clear(this.delegate.gl.COLOR_BUFFER_BIT);
-      let pixelsToWebGLMatrix = new Float32Array(16);
-      pixelsToWebGLMatrix.set([2 / params.canvas.width, 0, 0, 0, 0, -2 / params.canvas.height, 0, 0, 0, 0, 0, 0, -1, 1, 0, 1]);
-      this.delegate.gl.viewport(0, 0, params.canvas.width, params.canvas.height);
-      let pointSize = Math.max(this._map.getZoom() - 6.0, 1.0);
-      if(this.delegate.state.login === "asm") {
-        pointSize = Math.max(this._map.getZoom() - 0.0, 1.0);
-      }
-      this.delegate.gl.vertexAttrib1f(this.delegate.gl.aPointSize, pointSize);
-      // -- set base matrix to translate canvas pixel coordinates -> webgl coordinates
-      this.delegate.mapMatrix.set(pixelsToWebGLMatrix);
-      var bounds = this._map.getBounds();
-      var topLeft = new L.LatLng(bounds.getNorth(), bounds.getWest());
-      var offset = LatLongToPixelXY(topLeft.lat, topLeft.lng);
-      // -- Scale to current zoom
-      var scale = Math.pow(2, this._map.getZoom());
-      scaleMatrix(this.delegate.mapMatrix, scale, scale);
-      translateMatrix(this.delegate.mapMatrix, -offset.x, -offset.y);
-      let u_matLoc = this.delegate.gl.getUniformLocation(program, "u_matrix");
-      // -- attach matrix value to 'mapMatrix' uniform in shader
-      this.delegate.gl.uniformMatrix4fv(u_matLoc, false, this.delegate.mapMatrix);
-      this.delegate.gl.drawArrays(this.delegate.gl.POINTS, 0, numPoints);
-      if (this.delegate.state.mouseclick !== null) {
-        
-        let pixel = new Uint8Array(4);
-        this.delegate.gl.readPixels(this.delegate.state.mouseclick.originalEvent.layerX, 
-          this.canvas.height - this.delegate.state.mouseclick.originalEvent.layerY, 1, 1, this.delegate.gl.RGBA, this.delegate.gl.UNSIGNED_BYTE, pixel);
-        let index = pixel[0] + pixel[1] * 256 + pixel[2] * 256 * 256;
-        this.delegate.setState({mouseclick: null});
-        this.delegate.setIndex(index);
-        this._redraw();
-      }         
-    }
+    this.GLEngine.redraw(this.state.glpoints);
   }
 
   /**
@@ -337,7 +215,7 @@ addGLMarkers(project, data, type, zoomTo) {
     med = 4;
     low = 3;
   }
-  for (var i = 1; i < data.length; i++) { //start at one index 0 will be black
+  for (var i = 1; i < data.length; i++) { //start at one index 0 reserved for black
     const position = JSON.parse(data[i].st_asgeojson);
     const lng = position.coordinates[0];
     const lat = position.coordinates[1];
@@ -428,7 +306,8 @@ addGLMarkers(project, data, type, zoomTo) {
 
   this.setState({objGLData: faults});
   this.setState({glpoints: points}); //Immutable reserve of original points
-  this.redraw(points, null);
+  console.log(points);
+  this.GLEngine.redraw(points, null);
 }
 
 addCentrelines(data) {
@@ -459,20 +338,22 @@ addCentrelines(data) {
     }       
   } 
   this.setState({lineData: lines});  
-  this.redraw(lines, null);
+  console.log(lines);
+  this.GLEngine.redraw(lines, null);
+  
 }
 
   /**
    * adds various event listeners to the canvas
    */
   addEventListeners() {
-    this.canvas.addEventListener("webglcontextlost", function(event) {
-      event.preventDefault();
-      console.log("CRASH--recovering GL")
-    }, false);
-    this.canvas.addEventListener("webglcontextrestored", function(event) {
-    this.gl = this.canvas.getContext('webgl', { antialias: true });
-    }, false);
+    // this.canvas.addEventListener("webglcontextlost", function(event) {
+    //   event.preventDefault();
+    //   console.log("CRASH--recovering GL")
+    // }, false);
+    // this.canvas.addEventListener("webglcontextrestored", function(event) {
+    // this.gl = this.canvas.getContext('webgl', { antialias: true });
+    // }, false);
     this.leafletMap.addEventListener('mousemove', (event) => {
       this.onMouseMove(event);
     });
@@ -636,7 +517,7 @@ addCentrelines(data) {
       filterDropdowns: [],
       ages: []
     }, function() {
-      this.redraw([]);
+      this.GLEngine.redraw([]);
     })
   }
 
@@ -1002,7 +883,7 @@ addCentrelines(data) {
   removeLayer(e) {
     this.setState({objGLData: null});
     this.setState({glpoints: []});
-    this.redraw([]);
+    this.GLEngine.redraw([]);
     let layers = this.state.activeLayers;
     for(var i = 0; i < layers.length; i += 1) {     
       if (e.target.attributes.code.value === layers[i].code) {
@@ -1139,7 +1020,7 @@ addCentrelines(data) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          code: "900",
+          code: "058",
           menu: e.target.id,
           user: this.state.login
         })
@@ -1821,6 +1702,7 @@ updateStatus(marker, status) {
                   projects={props.projects.footpath} 
                   onClick={props.loadFootpathLayer}/>
                 <NavDropdown.Divider />
+                
                 <CustomMenu 
                   title="Remove Layer" 
                   className="navdropdownitem" 
@@ -1847,6 +1729,13 @@ updateStatus(marker, status) {
                   type={'footpath'} 
                   projects={props.projects.footpath} 
                   onClick={props.loadFootpathLayer}/>
+                   <NavDropdown.Divider />
+                  <CustomMenu 
+                  title="Add Centrelines" 
+                  className="navdropdownitem" 
+                  projects={props.projects.footpath} 
+                  type={'centreline'} 
+                  onClick={props.addCentreline}/>
                 <NavDropdown.Divider />
                 <CustomMenu 
                   title="Remove Layer" 
@@ -1891,21 +1780,33 @@ updateStatus(marker, status) {
             <div></div>  
             );
       } else {  
-        return (        
-          <NavDropdown title={props.title} className="navdropdownitem" drop="right">
-          {props.projects.map((value, index) =>      
-            <NavDropdown.Item className="navdropdownitem"
-              key={`${index}`}
-              index={index}
-              title={value.code}
-              code={value.code}
-              onClick={props.onClick}>
-              {value.description + " " + value.date}
-              <NavDropdown.Divider />
-            </NavDropdown.Item>
-          )}
-          </NavDropdown>
-          );
+        if (props.type === "centreline") {
+          return (        
+            <NavDropdown title={props.title} className="navdropdownitem">   
+              <NavDropdown.Item className="navdropdownitem"
+                onClick={props.onClick}>
+                <NavDropdown.Divider />
+              </NavDropdown.Item>
+            </NavDropdown>
+            );
+        } else {
+          return (        
+            <NavDropdown title={props.title} className="navdropdownitem" drop="right">
+            {props.projects.map((value, index) =>      
+              <NavDropdown.Item className="navdropdownitem"
+                key={`${index}`}
+                index={index}
+                title={value.code}
+                code={value.code}
+                onClick={props.onClick}>
+                {value.description + " " + value.date}
+                <NavDropdown.Divider />
+              </NavDropdown.Item>
+            )}
+            </NavDropdown>
+            );
+        }
+        
       }
     }
 
