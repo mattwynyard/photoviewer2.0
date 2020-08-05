@@ -11,8 +11,9 @@ import DynamicDropdown from './DynamicDropdown.js';
 import CustomModal from './CustomModal.js';
 import PhotoModal from './PhotoModal.js';
 import GLEngine from './GLEngine.js';
+import Vector2D from './Vector2D';
 
-import {LatLongToPixelXY, translateMatrix, scaleMatrix, pad, formatDate} from  './util.js'
+import {LatLongToPixelXY, pad, formatDate} from  './util.js'
 
 class App extends React.Component {
 
@@ -117,26 +118,18 @@ class App extends React.Component {
 
   initialize() {
     this.leafletMap = this.map.leafletElement;
-   
-    // if (this.gl == null) {
-    //   this.glLayer = L.canvasOverlay()
-    //   .addTo(this.leafletMap);
-    //   this.canvas = this.glLayer.canvas();
-      //this.glLayer.canvas.width = this.canvas.width;
-      //this.glLayer.canvas.height = this.canvas.height;
-      
-      this.GLEngine = new GLEngine(this.canvas, this.leafletMap); 
-      this.GLEngine.setAppDelegate(this);
+    this.GLEngine = new GLEngine(this.leafletMap); 
+    this.GLEngine.setAppDelegate(this);
 
-      //this.glLayer.delegate(this);
-      this.position = L.positionControl();
-      this.leafletMap.addControl(this.position);
-      this.addEventListeners(); 
-      if (this.state.login === 'asm') {
-        this.setState({priorityMode: "Priority"});
-      } else {
-        this.setState({priorityMode: "Grade"});
-      }  
+    //this.glLayer.delegate(this);
+    this.position = L.positionControl();
+    this.leafletMap.addControl(this.position);
+    this.addEventListeners(); 
+    if (this.state.login === 'asm') {
+      this.setState({priorityMode: "Priority"});
+    } else {
+      this.setState({priorityMode: "Grade"});
+    }  
     //}  
   }
   /**
@@ -150,7 +143,7 @@ class App extends React.Component {
       this.setState({selectedGLMarker: []});
       //this.setState({mouseclick: e})
       this.GLEngine.mouseclick = e;
-      this.GLEngine.redraw(this.state.glpoints);
+      this.GLEngine.redraw(this.state.lineData, this.state.glpoints);
     }
   }
   /**
@@ -187,7 +180,18 @@ class App extends React.Component {
       this.setState({selectedIndex: null});
       this.setState({selectedGLMarker: []});
     }
-    this.GLEngine.redraw(this.state.glpoints);
+    this.GLEngine.redraw(this.stte.lineData, this.state.glpoints);
+  }
+
+  buildGLMarker(point, type) {
+    if (type === "diamond") {
+      console.log(point);
+      let pointA = {x: point.x, y: point.y + 0.00001}
+      let pointB = {x: point.x + 0.00001, y: point.y}
+      let pointC = {x: point.x, y: point.y - 0.00001}
+      let pointD = {x: point.x - 0.00001, y: point.y}
+      return [pointA, pointB, pointC, pointD];
+    }
   }
 
   /**
@@ -306,17 +310,20 @@ addGLMarkers(project, data, type, zoomTo) {
 
   this.setState({objGLData: faults});
   this.setState({glpoints: points}); //Immutable reserve of original points
-  console.log(points);
-  this.GLEngine.redraw(points, null);
+  //console.log(points);
+  //this.GLEngine.redraw(points, null);
+  this.loadCentreline(this.state.activeProject);
 }
 
 addCentrelines(data) {
   let lines = [];
+  let indices = []
   for (var i = 0; i < data.length; i++) {
     const linestring = JSON.parse(data[i].st_asgeojson);
     const rcClass = data[i].onrcclass; 
     if(linestring !== null) {       
       let segment = linestring.coordinates[0];
+      indices.push(segment.length);
       var points = [];
       //let pixelSegment = null; 
       for (let j = 0; j < segment.length; j++) {
@@ -337,23 +344,16 @@ addCentrelines(data) {
       }           
     }       
   } 
-  this.setState({lineData: lines});  
-  console.log(lines);
-  this.GLEngine.redraw(lines, null);
+  this.setState({lineData: lines});
+  let numPoints = this.state.glpoints.length / 7;  
+  this.GLEngine.redraw(lines, this.state.glpoints);
   
-}
+} 
 
   /**
    * adds various event listeners to the canvas
    */
   addEventListeners() {
-    // this.canvas.addEventListener("webglcontextlost", function(event) {
-    //   event.preventDefault();
-    //   console.log("CRASH--recovering GL")
-    // }, false);
-    // this.canvas.addEventListener("webglcontextrestored", function(event) {
-    // this.gl = this.canvas.getContext('webgl', { antialias: true });
-    // }, false);
     this.leafletMap.addEventListener('mousemove', (event) => {
       this.onMouseMove(event);
     });
@@ -464,6 +464,15 @@ addCentrelines(data) {
       this.setState({selectedGLMarker: []});
       this.setIndex(0); //simulate user click black screen
     } 
+  }
+
+  /**
+   * fires when user scrolls mousewheel
+   * param - e the mouse event
+   **/
+  onZoom(e) {
+    this.setState({zoom: e.target.getZoom()});
+    this.setState({bounds: e.target.getBounds()});
   }
 
   /**
@@ -1010,7 +1019,7 @@ addCentrelines(data) {
     }    
   }
 
-  async loadCentreline(e) {
+  async loadCentreline(project) {
     if (this.state.login !== "Login") {
         await fetch('https://' + this.state.host + '/roads', {
         method: 'POST',
@@ -1021,7 +1030,7 @@ addCentrelines(data) {
         },
         body: JSON.stringify({
           code: "058",
-          menu: e.target.id,
+          menu: project,
           user: this.state.login
         })
       })
@@ -1934,6 +1943,7 @@ updateStatus(marker, status) {
           boxZoom={true}
           center={centre}
           zoom={this.state.zoom}
+          // onZoom={(e) => this.onZoom(e)}
           onClick={(e) => this.clickMap(e)}
           onPopupClose={(e) => this.closePopup(e)}>
           <TileLayer className="mapLayer"
